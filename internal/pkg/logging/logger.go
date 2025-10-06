@@ -21,7 +21,6 @@ func Init() {
 		Level: getLogLevel(),
 	}
 
-	// Use JSON in production for parsing, text in development for readability
 	if os.Getenv("ENV") == "production" {
 		handler = slog.NewJSONHandler(os.Stdout, opts)
 	} else {
@@ -34,12 +33,11 @@ func Init() {
 func getLogLevel() slog.Level {
 	env := os.Getenv("ENV")
 	if env == "production" {
-		return slog.LevelWarn // Production: minimal logging
+		return slog.LevelWarn
 	}
-	return slog.LevelDebug // Development: verbose logging
+	return slog.LevelDebug
 }
 
-// Request ID management
 func WithRequestID(ctx context.Context) context.Context {
 	requestID := uuid.New().String()
 	return context.WithValue(ctx, RequestIDKey, requestID)
@@ -52,7 +50,6 @@ func GetRequestID(ctx context.Context) string {
 	return "unknown"
 }
 
-// Context-aware logging functions
 func InfoCtx(ctx context.Context, msg string, args ...interface{}) {
 	requestID := GetRequestID(ctx)
 	allArgs := append([]interface{}{"request_id", requestID}, args...)
@@ -77,7 +74,6 @@ func WarnCtx(ctx context.Context, msg string, args ...interface{}) {
 	Logger.Warn(msg, allArgs...)
 }
 
-// Standard logging functions (without context)
 func Info(msg string, args ...interface{}) {
 	Logger.Info(msg, args...)
 }

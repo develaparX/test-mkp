@@ -16,32 +16,28 @@ type RedisCache struct {
 	client *redis.Client
 }
 
-// CacheConfig holds cache configuration
-// Deprecated: Use config.CacheConfig instead
 type CacheConfig struct {
 	Addr     string
 	Password string
 	DB       int
 }
 
-// Cache key constants for consistency
 const (
-	UserFileListKey = "user:files:%s"    // user:files:{userID}
-	FileMetadataKey = "file:metadata:%s" // file:metadata:{fileID}
-	FileExistsKey   = "file:exists:%s"   // file:exists:{fileID}
-	ProductListKey  = "products:list:%s" // products:list:{filters_hash}
-	ProductKey      = "product:%s"       // product:{productID}
-	UserProfileKey  = "user:profile:%s"  // user:profile:{userID}
+	UserFileListKey = "user:files:%s"
+	FileMetadataKey = "file:metadata:%s"
+	FileExistsKey   = "file:exists:%s"
+	ProductListKey  = "products:list:%s"
+	ProductKey      = "product:%s"
+	UserProfileKey  = "user:profile:%s"
 )
 
-// TTL constants for different data types
 const (
-	FileMetadataTTL = 1 * time.Hour    // File metadata rarely changes
-	FileListTTL     = 30 * time.Minute // User file lists change more often
-	FileExistsTTL   = 5 * time.Minute  // Quick existence checks
-	ProductListTTL  = 10 * time.Minute // Product search results
-	ProductTTL      = 30 * time.Minute // Individual products
-	UserProfileTTL  = 15 * time.Minute // User profiles
+	FileMetadataTTL = 1 * time.Hour
+	FileListTTL     = 30 * time.Minute
+	FileExistsTTL   = 5 * time.Minute
+	ProductListTTL  = 10 * time.Minute
+	ProductTTL      = 30 * time.Minute
+	UserProfileTTL  = 15 * time.Minute
 )
 
 func NewRedisCache(config config.CacheConfig) *RedisCache {
@@ -51,7 +47,6 @@ func NewRedisCache(config config.CacheConfig) *RedisCache {
 		DB:       config.DB,
 	})
 
-	// Test connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -64,8 +59,6 @@ func NewRedisCache(config config.CacheConfig) *RedisCache {
 	return &RedisCache{client: rdb}
 }
 
-// NewRedisCacheFromConfig creates a new Redis cache using the legacy CacheConfig struct
-// Deprecated: Use NewRedisCache instead
 func NewRedisCacheFromConfig(config CacheConfig) *RedisCache {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.Addr,
@@ -73,7 +66,6 @@ func NewRedisCacheFromConfig(config CacheConfig) *RedisCache {
 		DB:       config.DB,
 	})
 
-	// Test connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -158,7 +150,6 @@ func (c *RedisCache) Close() error {
 	return c.client.Close()
 }
 
-// Bulk operations for product catalog performance
 func (c *RedisCache) SetMultiple(ctx context.Context, data map[string]interface{}, expiration time.Duration) error {
 	pipe := c.client.Pipeline()
 
@@ -209,15 +200,13 @@ func (c *RedisCache) GetMultiple(ctx context.Context, keys []string) (map[string
 	return data, nil
 }
 
-// GetOrSet - common cache-aside pattern to reduce boilerplate
 func (c *RedisCache) GetOrSet(ctx context.Context, key string, dest interface{}, ttl time.Duration, fetchFn func() (interface{}, error)) error {
-	// Try to get from cache first
+
 	err := c.Get(ctx, key, dest)
 	if err == nil {
-		return nil // Cache hit
+		return nil
 	}
 
-	// Cache miss - fetch from source
 	if err != redis.Nil {
 		logger.ErrorCtx(ctx, "Redis GET OR SET - cache error", "key", key, "error", err)
 	}
@@ -228,12 +217,10 @@ func (c *RedisCache) GetOrSet(ctx context.Context, key string, dest interface{},
 		return err
 	}
 
-	// Set in cache (don't fail on cache set error)
 	if setErr := c.Set(ctx, key, data, ttl); setErr != nil {
 		logger.WarnCtx(ctx, "Redis GET OR SET - cache set failed", "key", key, "error", setErr)
 	}
 
-	// Copy data to destination
 	jsonData, _ := json.Marshal(data)
 	return json.Unmarshal(jsonData, dest)
 }

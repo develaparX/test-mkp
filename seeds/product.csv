@@ -1,0 +1,7 @@
+"id","product_name","service_fee","service_fee_percentage"
+1,"CEK SALDO ON US",0.15,True
+2,"TRANSFER OFF US",1,True
+3,"CEK SALDO ON US",0.15,True
+4,"TARIK TUNAI OFF US",7500,False
+5,"TARIK TUNAI ON US",6500,False
+6,"TARIK TUNAI OFF US",1,True

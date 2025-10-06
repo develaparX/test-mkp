@@ -7,7 +7,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Config holds all configuration for the application
 type Config struct {
 	Server   ServerConfig   `json:"server"`
 	Database DatabaseConfig `json:"database"`
@@ -16,13 +15,11 @@ type Config struct {
 	JWT      JWTConfig      `json:"jwt"`
 }
 
-// ServerConfig holds server configuration
 type ServerConfig struct {
 	Host string `json:"host"`
 	Port int    `json:"port"`
 }
 
-// DatabaseConfig holds database configuration
 type DatabaseConfig struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
@@ -32,7 +29,6 @@ type DatabaseConfig struct {
 	SSLMode  string `json:"ssl_mode"`
 }
 
-// CacheConfig holds cache configuration
 type CacheConfig struct {
 	Host     string `json:"host"`
 	Port     int    `json:"port"`
@@ -40,45 +36,37 @@ type CacheConfig struct {
 	DB       int    `json:"db"`
 }
 
-// LoggerConfig holds logger configuration
 type LoggerConfig struct {
 	Level string `json:"level"`
-	Type  string `json:"type"` // "simple", "json", etc.
+	Type  string `json:"type"`
 }
 
-// JWTConfig holds JWT configuration
 type JWTConfig struct {
 	SecretKey string `json:"secret_key"`
 	Issuer    string `json:"issuer"`
 }
 
-// LoadConfig loads configuration from .env file
 func LoadConfig(envPath string) (*Config, error) {
-	// Load .env file
+
 	if err := godotenv.Load(envPath); err != nil {
-		// If .env file doesn't exist, try to load from environment variables
-		// This is useful for production environments where config is set via environment
+
 	}
 
-	// Parse server port
 	serverPort, err := strconv.Atoi(getEnv("SERVER_PORT", "8080"))
 	if err != nil {
 		serverPort = 8080
 	}
 
-	// Parse database port
 	dbPort, err := strconv.Atoi(getEnv("DB_PORT", "5000"))
 	if err != nil {
 		dbPort = 5000
 	}
 
-	// Parse cache port
 	cachePort, err := strconv.Atoi(getEnv("CACHE_PORT", "6379"))
 	if err != nil {
 		cachePort = 6379
 	}
 
-	// Parse cache database
 	cacheDB, err := strconv.Atoi(getEnv("CACHE_DB", "0"))
 	if err != nil {
 		cacheDB = 0
@@ -116,7 +104,6 @@ func LoadConfig(envPath string) (*Config, error) {
 	return config, nil
 }
 
-// getEnv gets environment variable or returns default value
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value

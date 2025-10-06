@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: test-mkp-postgres
+    environment:
+      POSTGRES_DB: test_mkp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5000:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./migrations/02-seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - ./seeds:/seeds:ro
+
+volumes:
+  postgres_data:
